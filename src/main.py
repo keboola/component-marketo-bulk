@@ -1,18 +1,3 @@
-'''
-just fill the
--month
--year
--munchkin_id (in 1P)
--client_id (in 1P)
--client_secret (in 1P)
-
-and run it
-
-it will write file like 'Jan_2018_leads.csv'
-it also prints some messages while the script is running to let you know about the status
-if you wanted more/different fields, check the other file I am sending along
- and alter the body variable (you want the rest name from the json)
-'''
 import sys
 import requests
 import pandas as pd
