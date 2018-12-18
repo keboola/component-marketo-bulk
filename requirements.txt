@@ -1,0 +1,4 @@
+https://github.com/keboola/python-docker-application/zipball/master#egg=keboola
+https://bitbucket.org/kds_consulting_team/keboola-python-util-lib/get/0.0.4.zip#egg=kbc
+pytz
+python-dateutil
