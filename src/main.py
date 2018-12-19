@@ -34,7 +34,7 @@ desired_activities = [i.strip() for i in desired_activities_tmp.split(",")]
 
 if dayspan == '':
     month = cfg.get_parameters()["month/year"][:3]
-    year = cfg.get_parameters()["month/year"][4:]
+    year = int(cfg.get_parameters()["month/year"][4:])
     if year % 4 == 0 and year % 400 != 0:
         feb_length = '29'
     else:
