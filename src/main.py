@@ -63,6 +63,13 @@ else:
 
 logging.info("params read")
 
+# Destination to fetch and output files and tables
+DEFAULT_TABLE_INPUT = "/data/in/tables/"
+DEFAULT_FILE_INPUT = "/data/in/files/"
+
+DEFAULT_FILE_DESTINATION = "/data/out/files/"
+DEFAULT_TABLE_DESTINATION = "/data/out/tables/"
+
 
 def check_response(response, stage):
     if response.status_code != 200:
@@ -177,4 +184,4 @@ s = str(file_export.content, 'utf-8')
 data = StringIO(s)
 
 df = pd.read_csv(data)
-df.to_csv(path_or_buf=('%s_%s_activities.csv' % (start, end)))
+df.to_csv(path_or_buf=(DEFAULT_TABLE_DESTINATION + '%s_%s_activities.csv' % (start, end)))
