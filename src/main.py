@@ -54,8 +54,8 @@ if dayspan == '':
         'Nov': [year + "-11-01T00:00:00Z", year + "-11-30T23:59:59Z"],
         'Dec': [year + "-12-01T00:00:00Z", year + "-12-31T23:59:59Z"]
     }
-    start = months[month][0]
-    end = months[month][1]
+    start = months[month][0][:10]
+    end = months[month][1][:10]
 else:
     start = str((datetime.utcnow() - timedelta(days=int(dayspan)))
                 .date())
