@@ -184,5 +184,5 @@ s = str(file_export.content, 'utf-8')
 data = StringIO(s)
 
 df = pd.read_csv(data)
-df.to_csv(path_or_buf=(DEFAULT_TABLE_DESTINATION + '%s_%s_activities.csv' % (start, end)),
+df.to_csv(path_or_buf=(DEFAULT_TABLE_DESTINATION + 'bulk_lead_activities.csv'),
           index=False)
