@@ -177,4 +177,4 @@ s = str(file_export.content, 'utf-8')
 data = StringIO(s)
 
 df = pd.read_csv(data)
-df.to_csv(path_or_buf=('%s_%s_activities.csv' % (month, year)))
+df.to_csv(path_or_buf=('%s_%s_activities.csv' % (start, end)))
