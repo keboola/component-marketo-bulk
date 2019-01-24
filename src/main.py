@@ -1,3 +1,7 @@
+'''
+code is a hot fix, not a finished work
+'''
+
 import sys
 import requests
 import pandas as pd
@@ -28,13 +32,65 @@ params = cfg.get_parameters()
 client_id = cfg.get_parameters()["#client_id"]
 munchkin_id = cfg.get_parameters()["#munchkin_id"]
 client_secret = cfg.get_parameters()["#client_secret"]
-dayspan = cfg.get_parameters()["dayspan"]
+dayspan_updated = cfg.get_parameters()["dayspan_updated"]
+dayspan_created = cfg.get_parameters()["dayspan_created"]
+endpoint = cfg.get_parameters()["endpoint"]
 desired_activities_tmp = cfg.get_parameters()["desired_activities"]
 desired_activities = [i.strip() for i in desired_activities_tmp.split(",")]
 
-if dayspan == '':
-    month = cfg.get_parameters()["month/year"][:3]
-    year = int(cfg.get_parameters()["month/year"][4:])
+fields_str_tmp = "company, billingCity, billingState, billingCountry, billingPostalCode,\
+website, mainPhone, annualRevenue, numberOfEmployees, industry, sicCode, sfdcAccountId,\
+externalCompanyId, id, mktoName, personType, mktoIsPartner, isLead, mktoIsCustomer,\
+isAnonymous, salutation, firstName, middleName, lastName, email, phone, mobilePhone,\
+fax, title, contactCompany, address, city, state, country, postalCode, personTimeZone,\
+originalSourceType, originalSourceInfo, registrationSourceType, registrationSourceInfo,\
+originalSearchEngine, originalSearchPhrase, originalReferrer, emailInvalid,\
+emailInvalidCause, unsubscribed, unsubscribedReason, doNotCall, marketingSuspended,\
+marketingSuspendedCause, blackListed, blackListedCause, mktoPersonNotes, sfdcType,\
+sfdcContactId, anonymousIP, inferredCompany, inferredCountry, inferredCity,\
+inferredStateRegion, inferredPostalCode, inferredMetropolitanArea,\
+inferredPhoneAreaCode, emailSuspended, emailSuspendedCause, emailSuspendedAt, department, sfdcId,\
+createdAt, updatedAt, cookies, externalSalesPersonId, leadPerson, leadRole, leadSource,\
+leadStatus, leadScore, urgency, priority, relativeScore, relativeUrgency, rating, sfdcLeadId,\
+sfdcLeadOwnerId, personPrimaryLeadInterest, leadPartitionId, leadRevenueCycleModelId,\
+leadRevenueStageId, gender, facebookDisplayName, twitterDisplayName, linkedInDisplayName,\
+facebookProfileURL, twitterProfileURL, linkedInProfileURL, facebookPhotoURL, twitterPhotoURL,\
+linkedInPhotoURL, facebookReach, twitterReach, linkedInReach, facebookReferredVisits,\
+twitterReferredVisits, linkedInReferredVisits, totalReferredVisits, facebookReferredEnrollments,\
+twitterReferredEnrollments, linkedInReferredEnrollments, totalReferredEnrollments,\
+lastReferredVisit, lastReferredEnrollment, syndicationId, facebookId, twitterId, linkedInId,\
+acquisitionProgramId, mktoAcquisitionDate, mktoMarketingSuspendedReason, mktoEmailable,\
+mktoIsEmployee, mktoExcludefromScoring, mktoExcludefromLifecycle, RecordTypeId,\
+PartnerAccountId, CompanyDunsNumber, EmailBouncedReason, EmailBouncedDate, Account_Name__c,\
+C_Lead_Source_Original__c, Campaign__c, First_Name_Local__c, GSD_Region__c, Last_Name_Local__c,\
+Lead_Id__c, Lead_Owner__c, Phone_Extension__c, SFDC_AccountID__c, SFDC_ContactID__c,\
+AccountMatched__c, Adobe_Marketing_Cloud_ID__c, Adobe_Transaction_ID__c, Contact_Us_Comments__c, \
+Demandbase_DUNS__c, Demandbase_ID__c, Demandbase_Industry__c, Demandbase_Size__c,\
+Do_Not_Market_Until__c, Level__c, Marketing_Status__c, Product_Interest__c, Sub_Industry__c,\
+Region__c, Cloud__c, Velocity_Business_Unit__c, Velocity__c, IsPartner, AccountSource, DunsNumber,\
+NaicsCode, NaicsDesc, SicDesc, Location_ID__c, IsEmailBounced, Address_Line1__c, Left_Company__c,\
+Contact_Lead_Status__c, GDPRoptIn, demographicScore, firmographicScore, socialScore,\
+blacklistedDate, gDPROptInSource, campaignLatestDate, gDPRDoubleOptIn, gDPROptInDate,\
+gDPRStrictOptIndirectmail, gDPRStrictOptInphone, gDPRStrictOptInSMS, wentSFDCDate,\
+Marketo_Sync__c_contact, behaviorScore, functionalArea, annualRevenueRange,\
+GDPRStrictOptIndataprocessing, GDPRAnalyticsInterestpc, GDPRApplicationsInterestpc,\
+GDPRBusinessProcessServicesInterestpc, GDPRCloudInterestpc, GDPRSecurityInterestpc,\
+GDPRWorkplaceandMobilityInterestpc, GDPRBankingCapitalInterestpc, GDPRCommMediaEntorTechInterestpc,\
+GDPRConsumerRetailInterestpc, GDPREnergyInterestpc, GDPRHealthcareInterestpc,\
+GDPRLifeSciencesInterestpc, GDPRInsuranceInterestpc, GDPRManufacturingInterestpc,\
+GDPRPublicSectorInterestpc, GDPRTravelTransportationInterestpc, GDPRThriveNewsletterpc,\
+GDPRBlogUpdatesInterestpc, topics, contactUsGroupRouting, uniqueDateTime, fastTrack, referring_url,\
+DXCOfferingFamily, SLMSNewsletter, Velocity_Lead_Type__c, Preferred_Language__c,\
+Reject_Reason_Marketing__c, Lead_Country__c, Sub_Region__c,\
+Lead_Source_Campaign__c, Microsoft_Region__c, Business_Function__c, contactUsProcuctName,\
+leadSourceMostRecent, contactUsRelationship, contactUsIndustrySpecification, contactUsSolutionArea,\
+referringzoneslug, adobeVisitorID, gDPROptInPageSourced, lastWebPageVisited, areaofInterest,\
+dUNSNumberDomesticUltimatemarketing"
+fields_str = [i.strip() for i in fields_str_tmp.split(",")]
+
+if dayspan_created == '':
+    month = cfg.get_parameters()["month/year_created"][:3]
+    year = int(cfg.get_parameters()["month/year_created"][4:])
     if year % 4 == 0 and year % 400 != 0:
         feb_length = '29'
     else:
@@ -54,12 +110,41 @@ if dayspan == '':
         'Nov': [year + "-11-01T00:00:00Z", year + "-11-30T23:59:59Z"],
         'Dec': [year + "-12-01T00:00:00Z", year + "-12-31T23:59:59Z"]
     }
-    start = months[month][0][:10]
-    end = months[month][1][:10]
+    start_created = months[month][0][:10]
+    end_created = months[month][1][:10]
 else:
-    start = str((datetime.utcnow() - timedelta(days=int(dayspan)))
-                .date())
-    end = str(datetime.utcnow().date())
+    start_created = str((datetime.utcnow() - timedelta(days=int(dayspan_created)))
+                        .date())
+    end_created = str(datetime.utcnow().date())
+
+if dayspan_updated == '':
+    month = cfg.get_parameters()["month/year_updated"][:3]
+    year = int(cfg.get_parameters()["month/year_updated"][4:])
+    if year % 4 == 0 and year % 400 != 0:
+        feb_length = '29'
+    else:
+        feb_length = '28'
+    year = str(year)
+    months = {
+        'Jan': [year + "-01-01T00:00:00Z", year + "-01-31T23:59:59Z"],
+        'Feb': [year + "-02-01T00:00:00Z", year + "-02-" + feb_length + "T23:59:59Z"],
+        'Mar': [year + "-03-01T00:00:00Z", year + "-03-31T23:59:59Z"],
+        'Apr': [year + "-04-01T00:00:00Z", year + "-04-30T23:59:59Z"],
+        'May': [year + "-05-01T00:00:00Z", year + "-05-31T23:59:59Z"],
+        'Jun': [year + "-06-01T00:00:00Z", year + "-06-30T23:59:59Z"],
+        'Jul': [year + "-07-01T00:00:00Z", year + "-07-31T23:59:59Z"],
+        'Aug': [year + "-08-01T00:00:00Z", year + "-08-31T23:59:59Z"],
+        'Sep': [year + "-09-01T00:00:00Z", year + "-09-30T23:59:59Z"],
+        'Oct': [year + "-10-01T00:00:00Z", year + "-10-31T23:59:59Z"],
+        'Nov': [year + "-11-01T00:00:00Z", year + "-11-30T23:59:59Z"],
+        'Dec': [year + "-12-01T00:00:00Z", year + "-12-31T23:59:59Z"]
+    }
+    start_updated = months[month][0][:10]
+    end_updated = months[month][1][:10]
+else:
+    start_updated = str((datetime.utcnow() - timedelta(days=int(dayspan_updated)))
+                        .date())
+    end_updated = str(datetime.utcnow().date())
 
 logging.info("params read")
 
@@ -97,92 +182,158 @@ access_token = resp.json()['access_token']
 
 
 parameters_2 = {'access_token': access_token}
+if endpoint == 'Activities':
+    body = {
+        # "fields": [
+        #     "firstName",
+        #     "lastName",
+        #     "id",
+        #     "createdAt",
+        #     "company",
+        #     "email",
+        #     "phone",
+        #     "title",
+        #     "updatedAt",
+        #     "leadSource",
+        #     "acquisitionProgramId",
+        #     "C_Lead_Source_Original__c",
+        #     "Campaign__c"
 
-body = {
-    # "fields": [
-    #     "firstName",
-    #     "lastName",
-    #     "id",
-    #     "createdAt",
-    #     "company",
-    #     "email",
-    #     "phone",
-    #     "title",
-    #     "updatedAt",
-    #     "leadSource",
-    #     "acquisitionProgramId",
-    #     "C_Lead_Source_Original__c",
-    #     "Campaign__c"
-
-    # ],
-    "format": "CSV",
-    # "columnHeaderNames": {
-    #     "id": "lead_id",
-    #     "createdAt": "created_at",
-    #     "company": "company",
-    #     "email": "email",
-    #     "phone": "phone",
-    #     "title": "job_title",
-    #     "updatedAt": "updated_at",
-    #     "leadSource": "lead_source",
-    #     "acquisitionProgramId": "acquisition_program_id",
-    #     "C_Lead_Source_Original__c": "original_lead_source",
-    #     "Campaign__c": "primary_campaign",
-    #     "firstName": "first_name",
-    #     "lastName": "last_name"
-    # },
-    "filter": {
-        "createdAt": {
-            "startAt": start,
-            "endAt": end
-        },
-        "activityTypeIds":  desired_activities
+        # ],
+        "format": "CSV",
+        # "columnHeaderNames": {
+        #     "id": "lead_id",
+        #     "createdAt": "created_at",
+        #     "company": "company",
+        #     "email": "email",
+        #     "phone": "phone",
+        #     "title": "job_title",
+        #     "updatedAt": "updated_at",
+        #     "leadSource": "lead_source",
+        #     "acquisitionProgramId": "acquisition_program_id",
+        #     "C_Lead_Source_Original__c": "original_lead_source",
+        #     "Campaign__c": "primary_campaign",
+        #     "firstName": "first_name",
+        #     "lastName": "last_name"
+        # },
+        "filter": {
+            "createdAt": {
+                "startAt": start_created,
+                "endAt": end_updated
+            },
+            "updatedAt": {
+                "startAt": start_updated,
+                "endAt": end_updated
+            },
+            "activityTypeIds":  desired_activities
+        }
     }
-}
 
-create_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/create.json',
-                              params=parameters_2, json=body)
+    create_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/create.json',
+                                  params=parameters_2, json=body)
 
-check_response(create_export, 'Creating export')
-if not create_export.json()['success']:
-    logging.info('Creating export was not successfull.')
-    logging.info('Errors:')
-    logging.info(create_export.json()['errors'])
+    check_response(create_export, 'Creating export')
+    if not create_export.json()['success']:
+        logging.info('Creating export was not successfull.')
+        logging.info('Errors:')
+        logging.info(create_export.json()['errors'])
 
-export_id = create_export.json()['result'][0]['exportId']
+    export_id = create_export.json()['result'][0]['exportId']
 
-enqueue_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
-                               export_id + '/enqueue.json',
-                               params=parameters_2)
+    enqueue_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
+                                   export_id + '/enqueue.json',
+                                   params=parameters_2)
 
-check_response(enqueue_export, 'Enqueuing export')
+    check_response(enqueue_export, 'Enqueuing export')
 
-time.sleep(60)
-status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
-                             export_id + '/status.json',
-                             params=parameters_2)
-
-check_response(status_export, 'Getting status of the export')
-
-while status_export.json()['result'][0]['status'] != 'Completed':
-    print('W8 m8')
     time.sleep(60)
     status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
                                  export_id + '/status.json',
                                  params=parameters_2)
+
     check_response(status_export, 'Getting status of the export')
 
-file_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
-                           export_id + '/file.json',
-                           params=parameters_2)
+    while status_export.json()['result'][0]['status'] != 'Completed':
+        print('W8 m8')
+        time.sleep(60)
+        status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
+                                     export_id + '/status.json',
+                                     params=parameters_2)
+        check_response(status_export, 'Getting status of the export')
 
-check_response(file_export, 'File_export')
+    file_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
+                               export_id + '/file.json',
+                               params=parameters_2)
 
+    check_response(file_export, 'File_export')
 
-s = str(file_export.content, 'utf-8')
+    s = str(file_export.content, 'utf-8')
 
-data = StringIO(s)
+    data = StringIO(s)
 
-df = pd.read_csv(data)
-df.to_csv(path_or_buf=(DEFAULT_TABLE_DESTINATION + 'bulk_lead_activities.csv'),
-          index=False)
+    df = pd.read_csv(data)
+    df.to_csv(path_or_buf=(DEFAULT_TABLE_DESTINATION + 'bulk_lead_activities.csv'),
+              index=False)
+elif endpoint == 'Leads':
+    body = {
+        "fields": fields_str,
+        "format": "CSV",
+        "filter": {
+            "updatedAt": {
+                "startAt": start_updated,
+                "endAt": end_updated
+            },
+            "createdAt": {
+                "startAt": start_created,
+                "endAt": end_updated
+            }
+        }
+    }
+
+    create_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/create.json',
+                                  params=parameters_2, json=body)
+
+    check_response(create_export, 'Creating export')
+    if not create_export.json()['success']:
+        logging.info('Creating export was not successfull.')
+        logging.info('Errors:')
+        logging.info(create_export.json()['errors'])
+
+    export_id = create_export.json()['result'][0]['exportId']
+
+    enqueue_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/' +
+                                   export_id + '/enqueue.json',
+                                   params=parameters_2)
+
+    check_response(enqueue_export, 'Enqueuing export')
+
+    time.sleep(60)
+    status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/' +
+                                 export_id + '/status.json',
+                                 params=parameters_2)
+
+    check_response(status_export, 'Getting status of the export')
+
+    while status_export.json()['result'][0]['status'] != 'Completed':
+        print('W8 m8')
+        time.sleep(60)
+        status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/' +
+                                     export_id + '/status.json',
+                                     params=parameters_2)
+        check_response(status_export, 'Getting status of the export')
+
+    file_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/' +
+                               export_id + '/file.json',
+                               params=parameters_2)
+
+    check_response(file_export, 'File_export')
+
+    s = str(file_export.content, 'utf-8')
+
+    data = StringIO(s)
+
+    df = pd.read_csv(data)
+    df.to_csv(path_or_buf=(DEFAULT_TABLE_DESTINATION + 'bulk_leads.csv'),
+              index=False)
+else:
+    logging.info('The endpoint is incorrectly specified.')
