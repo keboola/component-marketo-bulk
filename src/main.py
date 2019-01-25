@@ -262,12 +262,10 @@ if endpoint == 'Activities':
 
     check_response(file_export, 'File_export')
 
-    s = str(file_export.content, 'utf-8')
-
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
     with open(output_file, "w") as out_file:
-        for line in s.splitlines():
+        for line in str(file_export.content, 'utf-8').splitlines():
             out_file.write(line)
             out_file.write('\n')
 
@@ -335,12 +333,10 @@ elif endpoint == 'Leads':
 
     check_response(file_export, 'File_export')
 
-    s = str(file_export.content, 'utf-8')
-
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
     with open(output_file, "w") as out_file:
-        for line in s.splitlines():
+        for line in str(file_export.content, 'utf-8').splitlines():
             out_file.write(line)
             out_file.write('\n')
 else:
