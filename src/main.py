@@ -4,10 +4,8 @@ code is a hot fix, not a finished work
 
 import sys
 import requests
-import pandas as pd
 import time
 import logging
-from io import StringIO
 import os
 from keboola import docker
 from datetime import datetime, timedelta
@@ -266,11 +264,13 @@ if endpoint == 'Activities':
 
     s = str(file_export.content, 'utf-8')
 
-    data = StringIO(s)
+    output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
-    df = pd.read_csv(data)
-    df.to_csv(path_or_buf=(DEFAULT_TABLE_DESTINATION + 'bulk_lead_activities.csv'),
-              index=False)
+    with open(output_file, "w") as out_file:
+        for line in s.splitlines():
+            out_file.write(line)
+            out_file.write('\n')
+
 elif endpoint == 'Leads':
     body = {
         "fields": fields_str,
@@ -300,6 +300,7 @@ elif endpoint == 'Leads':
                                   params=parameters_2, json=body)
 
     check_response(create_export, 'Creating export')
+
     if not create_export.json()['success']:
         logging.info('Creating export was not successfull.')
         logging.info('Errors:')
@@ -336,10 +337,11 @@ elif endpoint == 'Leads':
 
     s = str(file_export.content, 'utf-8')
 
-    data = StringIO(s)
+    output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
-    df = pd.read_csv(data)
-    df.to_csv(path_or_buf=(DEFAULT_TABLE_DESTINATION + 'bulk_leads.csv'),
-              index=False)
+    with open(output_file, "w") as out_file:
+        for line in s.splitlines():
+            out_file.write(line)
+            out_file.write('\n')
 else:
     logging.info('The endpoint is incorrectly specified.')
