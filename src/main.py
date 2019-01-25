@@ -164,7 +164,7 @@ elif dayspan_updated != '' and month_year_updated != '':
 elif dayspan_updated == '' and month_year_updated == '':
     UPDATED_DATE = False
     logging.info('Updated Date not provided')
-elif dayspan_updated != '' and month_year_created == '':
+elif dayspan_updated != '' and month_year_updated == '':
     UPDATED_DATE = True
     start_updated = str((datetime.utcnow() - timedelta(days=int(dayspan_updated)))
                         .date())
