@@ -37,6 +37,8 @@ dayspan_created = cfg.get_parameters()["dayspan_created"]
 endpoint = cfg.get_parameters()["endpoint"]
 desired_activities_tmp = cfg.get_parameters()["desired_activities"]
 desired_activities = [i.strip() for i in desired_activities_tmp.split(",")]
+month_year_created = cfg.get_parameters()["month/year_created"]
+month_year_updated = cfg.get_parameters()["month/year_updated"]
 
 fields_str_tmp = "company, billingCity, billingState, billingCountry, billingPostalCode,\
 website, mainPhone, annualRevenue, numberOfEmployees, industry, sicCode, sfdcAccountId,\
@@ -88,9 +90,10 @@ referringzoneslug, adobeVisitorID, gDPROptInPageSourced, lastWebPageVisited, are
 dUNSNumberDomesticUltimatemarketing"
 fields_str = [i.strip() for i in fields_str_tmp.split(",")]
 
-if dayspan_created == '':
-    month = cfg.get_parameters()["month/year_created"][:3]
-    year = int(cfg.get_parameters()["month/year_created"][4:])
+if dayspan_created == '' and month_year_created != '':
+    CREATED_DATE = True
+    month = month_year_created[:3]
+    year = int(month_year_created[4:])
     if year % 4 == 0 and year % 400 != 0:
         feb_length = '29'
     else:
@@ -112,14 +115,26 @@ if dayspan_created == '':
     }
     start_created = months[month][0][:10]
     end_created = months[month][1][:10]
-else:
+elif dayspan_created != '' and month_year_created != '':
+    CREATED_DATE = True
+    logging.info('Disregarding the <Month/Year for \'Created\'> parameter, taking into consideration only the \
+<How many days back you want to go with \'Created\'?> parameter')
+    start_created = str((datetime.utcnow() - timedelta(days=int(dayspan_created)))
+                        .date())
+    end_created = str(datetime.utcnow().date())
+elif dayspan_created == '' and month_year_created == '':
+    CREATED_DATE = False
+    logging.info('Created Date not provided')
+elif dayspan_created != '' and month_year_created == '':
+    CREATED_DATE = True
     start_created = str((datetime.utcnow() - timedelta(days=int(dayspan_created)))
                         .date())
     end_created = str(datetime.utcnow().date())
 
-if dayspan_updated == '':
-    month = cfg.get_parameters()["month/year_updated"][:3]
-    year = int(cfg.get_parameters()["month/year_updated"][4:])
+if dayspan_updated == '' and month_year_updated != '':
+    UPDATED_DATE = True
+    month = month_year_updated[:3]
+    year = int(month_year_updated[4:])
     if year % 4 == 0 and year % 400 != 0:
         feb_length = '29'
     else:
@@ -141,7 +156,18 @@ if dayspan_updated == '':
     }
     start_updated = months[month][0][:10]
     end_updated = months[month][1][:10]
-else:
+elif dayspan_updated != '' and month_year_updated != '':
+    UPDATED_DATE = True
+    logging.info('Disregarding the <Month/Year for \'Updated\'> parameter, taking into consideration only the \
+<How many days back you want to go with \'Updated\'?> parameter')
+    start_updated = str((datetime.utcnow() - timedelta(days=int(dayspan_updated)))
+                        .date())
+    end_updated = str(datetime.utcnow().date())
+elif dayspan_updated == '' and month_year_updated == '':
+    UPDATED_DATE = False
+    logging.info('Updated Date not provided')
+elif dayspan_updated != '' and month_year_created == '':
+    UPDATED_DATE = True
     start_updated = str((datetime.utcnow() - timedelta(days=int(dayspan_updated)))
                         .date())
     end_updated = str(datetime.utcnow().date())
@@ -184,50 +210,21 @@ access_token = resp.json()['access_token']
 parameters_2 = {'access_token': access_token}
 if endpoint == 'Activities':
     body = {
-        # "fields": [
-        #     "firstName",
-        #     "lastName",
-        #     "id",
-        #     "createdAt",
-        #     "company",
-        #     "email",
-        #     "phone",
-        #     "title",
-        #     "updatedAt",
-        #     "leadSource",
-        #     "acquisitionProgramId",
-        #     "C_Lead_Source_Original__c",
-        #     "Campaign__c"
-
-        # ],
-        "format": "CSV",
-        # "columnHeaderNames": {
-        #     "id": "lead_id",
-        #     "createdAt": "created_at",
-        #     "company": "company",
-        #     "email": "email",
-        #     "phone": "phone",
-        #     "title": "job_title",
-        #     "updatedAt": "updated_at",
-        #     "leadSource": "lead_source",
-        #     "acquisitionProgramId": "acquisition_program_id",
-        #     "C_Lead_Source_Original__c": "original_lead_source",
-        #     "Campaign__c": "primary_campaign",
-        #     "firstName": "first_name",
-        #     "lastName": "last_name"
-        # },
-        "filter": {
-            "createdAt": {
-                "startAt": start_created,
-                "endAt": end_updated
-            },
-            "updatedAt": {
-                "startAt": start_updated,
-                "endAt": end_updated
-            },
-            "activityTypeIds":  desired_activities
-        }
+        "format": "CSV"
     }
+    if not CREATED_DATE:
+        logging.info('The Activities endpoint requires Created Date interval!')
+        sys.exit(1)
+    else:
+        body['filter'] = {}
+        body['filter']['createdAt'] = {"startAt": start_created,
+                                       "endAt": end_created}
+
+    if not UPDATED_DATE:
+        pass
+    else:
+        body['filter']['updatedAt'] = {"startAt": start_updated,
+                                       "endAt": end_updated}
 
     create_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/create.json',
                                   params=parameters_2, json=body)
@@ -277,18 +274,27 @@ if endpoint == 'Activities':
 elif endpoint == 'Leads':
     body = {
         "fields": fields_str,
-        "format": "CSV",
-        "filter": {
-            "updatedAt": {
-                "startAt": start_updated,
-                "endAt": end_updated
-            },
-            "createdAt": {
-                "startAt": start_created,
-                "endAt": end_updated
-            }
-        }
+        "format": "CSV"
     }
+
+    if CREATED_DATE and UPDATED_DATE:
+        body['filter'] = {}
+        body['filter']['createdAt'] = {"startAt": start_created,
+                                       "endAt": end_created}
+        body['filter']['updatedAt'] = {"startAt": start_updated,
+                                       "endAt": end_updated}
+    elif CREATED_DATE and (not UPDATED_DATE):
+        body['filter'] = {}
+        body['filter']['createdAt'] = {"startAt": start_created,
+                                       "endAt": end_created}
+    elif (not CREATED_DATE) and UPDATED_DATE:
+        body['filter'] = {}
+        body['filter']['updatedAt'] = {"startAt": start_updated,
+                                       "endAt": end_updated}
+    elif CREATED_DATE or UPDATED_DATE:
+        logging.info(
+            'The Leads endpoint requires either Created or Updated parameter!')
+        sys.exit(1)
 
     create_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/create.json',
                                   params=parameters_2, json=body)
