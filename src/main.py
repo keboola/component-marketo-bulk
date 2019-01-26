@@ -9,6 +9,7 @@ import logging
 import os
 from keboola import docker
 from datetime import datetime, timedelta
+import subprocess
 
 # Environment setup
 abspath = os.path.abspath(__file__)
@@ -256,18 +257,11 @@ if endpoint == 'Activities':
                                      params=parameters_2)
         check_response(status_export, 'Getting status of the export')
 
-    file_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
-                               export_id + '/file.json',
-                               params=parameters_2)
-
-    check_response(file_export, 'File_export')
-
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
-    with open(output_file, "w") as out_file:
-        for line in str(file_export.content, 'utf-8').splitlines():
-            out_file.write(line)
-            out_file.write('\n')
+    args = "curl \"https://566-GCC-428.mktorest.com/bulk/v1/activities/export/" + export_id + \
+        "/file.json?access_token=" + access_token + "\"" + " > \"" + output_file + "\""
+    subprocess.call(args, shell=True)
 
 elif endpoint == 'Leads':
     body = {
@@ -327,17 +321,10 @@ elif endpoint == 'Leads':
                                      params=parameters_2)
         check_response(status_export, 'Getting status of the export')
 
-    file_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/' +
-                               export_id + '/file.json',
-                               params=parameters_2)
-
-    check_response(file_export, 'File_export')
-
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
-    with open(output_file, "w") as out_file:
-        for line in str(file_export.content, 'utf-8').splitlines():
-            out_file.write(line)
-            out_file.write('\n')
+    args = "curl \"https://566-GCC-428.mktorest.com/bulk/v1/leads/export/" + export_id + \
+        "/file.json?access_token=" + access_token + "\"" + " > \"" + output_file + "\""
+    subprocess.call(args, shell=True)
 else:
     logging.info('The endpoint is incorrectly specified.')
