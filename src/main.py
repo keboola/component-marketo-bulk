@@ -224,6 +224,14 @@ if endpoint == 'Activities':
     else:
         body['filter']['updatedAt'] = {"startAt": start_updated,
                                        "endAt": end_updated}
+    if len(desired_activities) > 0:
+        try:
+            body['filter']['activityTypeIds'] = desired_activities
+        except KeyError:
+            body['filter'] = {}
+            body['filter']['activityTypeIds'] = desired_activities
+    else:
+        pass
 
     create_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/create.json',
                                   params=parameters_2, json=body)
