@@ -10,6 +10,7 @@ import os
 from keboola import docker
 from datetime import datetime, timedelta
 import subprocess
+import json
 
 # Environment setup
 abspath = os.path.abspath(__file__)
@@ -181,6 +182,32 @@ DEFAULT_FILE_DESTINATION = "/data/out/files/"
 DEFAULT_TABLE_DESTINATION = "/data/out/tables/"
 
 
+def save_manifest(file_name, primary_keys):
+    """
+    Dummy function for returning manifest
+    """
+
+    file = '/data/out/tables/' + file_name + ".manifest"
+
+    logging.info("Manifest output: {0}".format(file))
+
+    manifest = {
+        'destination': '',
+        'incremental': True,
+        'primary_key': primary_keys
+    }
+
+    try:
+        with open(file, 'w') as file_out:
+            json.dump(manifest, file_out)
+            logging.info("Output manifest file ({0}) produced.".format(file))
+    except Exception as e:
+        logging.error("Could not produce output file manifest.")
+        logging.error(e)
+
+    return
+
+
 def check_response(response, stage):
     if response.status_code != 200:
         print(stage + ' failed.')
@@ -271,6 +298,9 @@ if endpoint == 'Activities':
         "/file.json?access_token=" + access_token + "\"" + " > \"" + output_file + "\""
     subprocess.call(args, shell=True)
 
+    file_name = endpoint + "_bulk.csv"
+    save_manifest(file_name=file_name, primary_keys=['marketoGUID'])
+
 elif endpoint == 'Leads':
     body = {
         "fields": fields_str,
@@ -334,5 +364,7 @@ elif endpoint == 'Leads':
     args = "curl \"https://566-GCC-428.mktorest.com/bulk/v1/leads/export/" + export_id + \
         "/file.json?access_token=" + access_token + "\"" + " > \"" + output_file + "\""
     subprocess.call(args, shell=True)
+    file_name = endpoint + "_bulk.csv"
+    save_manifest(file_name=file_name, primary_keys=['id'])
 else:
     logging.info('The endpoint is incorrectly specified.')
