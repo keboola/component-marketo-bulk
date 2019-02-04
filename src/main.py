@@ -29,6 +29,7 @@ logging.basicConfig(
 cfg = docker.Config('/data/')
 params = cfg.get_parameters()
 
+# Read the parameters
 client_id = cfg.get_parameters()["#client_id"]
 munchkin_id = cfg.get_parameters()["#munchkin_id"]
 client_secret = cfg.get_parameters()["#client_secret"]
@@ -40,6 +41,7 @@ desired_activities = [i.strip() for i in desired_activities_tmp.split(",")]
 month_year_created = cfg.get_parameters()["month/year_created"]
 month_year_updated = cfg.get_parameters()["month/year_updated"]
 
+# The colnames for Leads endpoint
 fields_str_tmp = "company, billingCity, billingState, billingCountry, billingPostalCode,\
 website, mainPhone, annualRevenue, numberOfEmployees, industry, sicCode, sfdcAccountId,\
 externalCompanyId, id, mktoName, personType, mktoIsPartner, isLead, mktoIsCustomer,\
@@ -90,6 +92,8 @@ referringzoneslug, adobeVisitorID, gDPROptInPageSourced, lastWebPageVisited, are
 dUNSNumberDomesticUltimatemarketing"
 fields_str = [i.strip() for i in fields_str_tmp.split(",")]
 
+# Created filter
+# Determine whether we want to get data from past X days or from a specific month/year.
 if dayspan_created == '' and month_year_created != '':
     CREATED_DATE = True
     month = month_year_created[:3]
@@ -131,6 +135,8 @@ elif dayspan_created != '' and month_year_created == '':
                         .date())
     end_created = str(datetime.utcnow().date())
 
+# Updated filter
+# Determine whether we want to get data from past X days or from a specific month/year.
 if dayspan_updated == '' and month_year_updated != '':
     UPDATED_DATE = True
     month = month_year_updated[:3]
@@ -207,6 +213,8 @@ def save_manifest(file_name, primary_keys):
 
     return
 
+# check response
+
 
 def check_response(response, stage):
     if response.status_code != 200:
@@ -217,23 +225,20 @@ def check_response(response, stage):
         print(stage + ' passed.')
 
 
-parameters = {'munchkin_id': munchkin_id,
-              'client_id': client_id,
-              'client_secret': client_secret}
-
 parameters_1 = {'client_id': client_id,
                 'client_secret': client_secret,
                 'grant_type': 'client_credentials'}
 
-
+# get the token
 resp = requests.get(
     url='https://566-GCC-428.mktorest.com/identity/oauth/token', params=parameters_1)
 check_response(resp, 'Obtaining access token')
 
 access_token = resp.json()['access_token']
 
-
 parameters_2 = {'access_token': access_token}
+
+# endpoint Activities
 if endpoint == 'Activities':
     body = {
         "format": "CSV"
@@ -260,6 +265,7 @@ if endpoint == 'Activities':
     else:
         pass
 
+    # Create the export
     create_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/create.json',
                                   params=parameters_2, json=body)
 
@@ -271,6 +277,7 @@ if endpoint == 'Activities':
 
     export_id = create_export.json()['result'][0]['exportId']
 
+    # Enqueue export
     enqueue_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
                                    export_id + '/enqueue.json',
                                    params=parameters_2)
@@ -284,23 +291,28 @@ if endpoint == 'Activities':
 
     check_response(status_export, 'Getting status of the export')
 
+    # Wait for them to prepare the export
     while status_export.json()['result'][0]['status'] != 'Completed':
-        print('W8 m8')
+        print('Export not ready, next check in 60 seconds.')
         time.sleep(60)
         status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
                                      export_id + '/status.json',
                                      params=parameters_2)
         check_response(status_export, 'Getting status of the export')
 
+    # set up the name of the output file
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
+    # assemble the curl command and running it
     args = "curl \"https://566-GCC-428.mktorest.com/bulk/v1/activities/export/" + export_id + \
         "/file.json?access_token=" + access_token + "\"" + " > \"" + output_file + "\""
     subprocess.call(args, shell=True)
 
+    # save the appropriate manifest
     file_name = endpoint + "_bulk.csv"
     save_manifest(file_name=file_name, primary_keys=['marketoGUID'])
 
+# endpoint
 elif endpoint == 'Leads':
     body = {
         "fields": fields_str,
@@ -326,6 +338,7 @@ elif endpoint == 'Leads':
             'The Leads endpoint requires either Created or Updated parameter!')
         sys.exit(1)
 
+    # Create the export
     create_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/create.json',
                                   params=parameters_2, json=body)
 
@@ -351,8 +364,9 @@ elif endpoint == 'Leads':
 
     check_response(status_export, 'Getting status of the export')
 
+    # Wait for them to prepare the export
     while status_export.json()['result'][0]['status'] != 'Completed':
-        print('W8 m8')
+        print('Export not ready, next check in 60 seconds.')
         time.sleep(60)
         status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/' +
                                      export_id + '/status.json',
@@ -361,10 +375,13 @@ elif endpoint == 'Leads':
 
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
+    # assemble the curl command and run it
     args = "curl \"https://566-GCC-428.mktorest.com/bulk/v1/leads/export/" + export_id + \
         "/file.json?access_token=" + access_token + "\"" + " > \"" + output_file + "\""
     subprocess.call(args, shell=True)
     file_name = endpoint + "_bulk.csv"
+
+    # save the manifest
     save_manifest(file_name=file_name, primary_keys=['id'])
 else:
     logging.info('The endpoint is incorrectly specified.')
