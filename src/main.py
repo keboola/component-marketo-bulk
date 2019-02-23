@@ -65,7 +65,7 @@ twitterReferredEnrollments, linkedInReferredEnrollments, totalReferredEnrollment
 lastReferredVisit, lastReferredEnrollment, syndicationId, facebookId, twitterId, linkedInId,\
 acquisitionProgramId, mktoAcquisitionDate, mktoMarketingSuspendedReason, mktoEmailable,\
 mktoIsEmployee, mktoExcludefromScoring, mktoExcludefromLifecycle, RecordTypeId,\
-PartnerAccountId, CompanyDunsNumber, EmailBouncedReason, EmailBouncedDate, Account_Name__c,\
+PartnerAccountId, EmailBouncedReason, EmailBouncedDate, Account_Name__c,\
 C_Lead_Source_Original__c, Campaign__c, First_Name_Local__c, GSD_Region__c, Last_Name_Local__c,\
 Lead_Id__c, Lead_Owner__c, Phone_Extension__c, SFDC_AccountID__c, SFDC_ContactID__c,\
 AccountMatched__c, Adobe_Marketing_Cloud_ID__c, Adobe_Transaction_ID__c, Contact_Us_Comments__c, \
