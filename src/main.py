@@ -46,7 +46,7 @@ fields_str_tmp = "company, billingCity, billingState, billingCountry, billingPos
 website, mainPhone, annualRevenue, numberOfEmployees, industry, sicCode, sfdcAccountId,\
 externalCompanyId, id, mktoName, personType, mktoIsPartner, isLead, mktoIsCustomer,\
 isAnonymous, salutation, firstName, middleName, lastName, email, phone, mobilePhone,\
-fax, title, contactCompany, address, city, state, country, postalCode, personTimeZone,\
+title, contactCompany, address, city, state, country, postalCode, personTimeZone,\
 originalSourceType, originalSourceInfo, registrationSourceType, registrationSourceInfo,\
 originalSearchEngine, originalSearchPhrase, originalReferrer, emailInvalid,\
 emailInvalidCause, unsubscribed, unsubscribedReason, doNotCall, marketingSuspended,\
