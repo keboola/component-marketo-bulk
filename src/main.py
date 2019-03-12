@@ -40,56 +40,7 @@ desired_activities_tmp = cfg.get_parameters()["desired_activities"]
 desired_activities = [i.strip() for i in desired_activities_tmp.split(",")]
 month_year_created = cfg.get_parameters()["month/year_created"]
 month_year_updated = cfg.get_parameters()["month/year_updated"]
-
-# The colnames for Leads endpoint
-fields_str_tmp = "company, billingCity, billingState, billingCountry, billingPostalCode,\
-website, mainPhone, annualRevenue, numberOfEmployees, industry, sicCode, sfdcAccountId,\
-externalCompanyId, id, mktoName, personType, mktoIsPartner, isLead, mktoIsCustomer,\
-isAnonymous, salutation, firstName, middleName, lastName, email, phone, mobilePhone,\
-title, contactCompany, address, city, state, country, postalCode, personTimeZone,\
-originalSourceType, originalSourceInfo, registrationSourceType, registrationSourceInfo,\
-originalSearchEngine, originalSearchPhrase, originalReferrer, emailInvalid,\
-emailInvalidCause, unsubscribed, unsubscribedReason, doNotCall, marketingSuspended,\
-marketingSuspendedCause, blackListed, blackListedCause, mktoPersonNotes, sfdcType,\
-sfdcContactId, anonymousIP, inferredCompany, inferredCountry, inferredCity,\
-inferredStateRegion, inferredPostalCode, inferredMetropolitanArea,\
-inferredPhoneAreaCode, emailSuspended, emailSuspendedCause, emailSuspendedAt, department, sfdcId,\
-createdAt, updatedAt, cookies, externalSalesPersonId, leadPerson, leadRole, leadSource,\
-leadStatus, leadScore, urgency, priority, relativeScore, relativeUrgency, rating, sfdcLeadId,\
-sfdcLeadOwnerId, personPrimaryLeadInterest, leadPartitionId, leadRevenueCycleModelId,\
-leadRevenueStageId, gender, facebookDisplayName, twitterDisplayName, linkedInDisplayName,\
-facebookProfileURL, twitterProfileURL, linkedInProfileURL, facebookPhotoURL, twitterPhotoURL,\
-linkedInPhotoURL, facebookReach, twitterReach, linkedInReach, facebookReferredVisits,\
-twitterReferredVisits, linkedInReferredVisits, totalReferredVisits, facebookReferredEnrollments,\
-twitterReferredEnrollments, linkedInReferredEnrollments, totalReferredEnrollments,\
-lastReferredVisit, lastReferredEnrollment, syndicationId, facebookId, twitterId, linkedInId,\
-acquisitionProgramId, mktoAcquisitionDate, mktoMarketingSuspendedReason, mktoEmailable,\
-mktoIsEmployee, mktoExcludefromScoring, mktoExcludefromLifecycle, RecordTypeId,\
-PartnerAccountId, EmailBouncedReason, EmailBouncedDate, Account_Name__c,\
-C_Lead_Source_Original__c, Campaign__c, First_Name_Local__c, GSD_Region__c, Last_Name_Local__c,\
-Lead_Id__c, Lead_Owner__c, Phone_Extension__c, SFDC_AccountID__c, SFDC_ContactID__c,\
-AccountMatched__c, Adobe_Marketing_Cloud_ID__c, Adobe_Transaction_ID__c, Contact_Us_Comments__c, \
-Demandbase_DUNS__c, Demandbase_ID__c, Demandbase_Industry__c, Demandbase_Size__c,\
-Do_Not_Market_Until__c, Level__c, Marketing_Status__c, Product_Interest__c, Sub_Industry__c,\
-Region__c, Cloud__c, Velocity_Business_Unit__c, Velocity__c, IsPartner, AccountSource, DunsNumber,\
-NaicsCode, NaicsDesc, SicDesc, Location_ID__c, IsEmailBounced, Address_Line1__c, Left_Company__c,\
-Contact_Lead_Status__c, GDPRoptIn, demographicScore, firmographicScore, socialScore,\
-blacklistedDate, gDPROptInSource, campaignLatestDate, gDPRDoubleOptIn, gDPROptInDate,\
-gDPRStrictOptIndirectmail, gDPRStrictOptInphone, gDPRStrictOptInSMS, wentSFDCDate,\
-Marketo_Sync__c_contact, behaviorScore, functionalArea, annualRevenueRange,\
-GDPRStrictOptIndataprocessing, GDPRAnalyticsInterestpc, GDPRApplicationsInterestpc,\
-GDPRBusinessProcessServicesInterestpc, GDPRCloudInterestpc, GDPRSecurityInterestpc,\
-GDPRWorkplaceandMobilityInterestpc, GDPRBankingCapitalInterestpc, GDPRCommMediaEntorTechInterestpc,\
-GDPRConsumerRetailInterestpc, GDPREnergyInterestpc, GDPRHealthcareInterestpc,\
-GDPRLifeSciencesInterestpc, GDPRInsuranceInterestpc, GDPRManufacturingInterestpc,\
-GDPRPublicSectorInterestpc, GDPRTravelTransportationInterestpc, GDPRThriveNewsletterpc,\
-GDPRBlogUpdatesInterestpc, topics, contactUsGroupRouting, uniqueDateTime, fastTrack, referring_url,\
-DXCOfferingFamily, SLMSNewsletter, Velocity_Lead_Type__c, Preferred_Language__c,\
-Reject_Reason_Marketing__c, Lead_Country__c, Sub_Region__c,\
-Lead_Source_Campaign__c, Microsoft_Region__c, Business_Function__c, contactUsProcuctName,\
-leadSourceMostRecent, contactUsRelationship, contactUsIndustrySpecification, contactUsSolutionArea,\
-referringzoneslug, adobeVisitorID, gDPROptInPageSourced, lastWebPageVisited, areaofInterest,\
-dUNSNumberDomesticUltimatemarketing"
+fields_str_tmp = cfg.get_parameters()["desired_fields"]
 fields_str = [i.strip() for i in fields_str_tmp.split(",")]
 
 # Created filter
