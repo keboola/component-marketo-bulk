@@ -41,6 +41,13 @@ desired_activities = [i.strip() for i in desired_activities_tmp.split(",")]
 month_year_created = cfg.get_parameters()["month/year_created"]
 month_year_updated = cfg.get_parameters()["month/year_updated"]
 
+logging.info("Dayspan updated: %s" % dayspan_updated)
+logging.info("Dayspan created: %s" % dayspan_created)
+logging.info("Endpoint: %s" % endpoint)
+logging.info("Desired activities: %s" % str(desired_activities))
+logging.info("Month/Year updated: %s" % month_year_updated)
+logging.info("Month/Year created: %s" % month_year_created)
+
 # The colnames for Leads endpoint
 fields_str_tmp = "company, billingCity, billingState, billingCountry, billingPostalCode,\
 website, mainPhone, annualRevenue, numberOfEmployees, industry, sicCode, sfdcAccountId,\
