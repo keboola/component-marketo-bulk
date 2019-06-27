@@ -1,0 +1,3 @@
+This component allows for bulk exports from the [Marketo REST API](http://developers.marketo.com/rest-api/bulk-extract/). You can choose to export data from either Leads or Activity endpoint.
+
+You can either choose to export data from specified month/year (utilizing parameter Month/Year) or relatively (from *(Today- n_days)* to * Today*, utilizing the parameter *How many days back you want to go?*). Bear in mind that the maximum length of time range specified is 31 (limit coming from the API).

@@ -31,7 +31,7 @@ params = cfg.get_parameters()
 
 # Read the parameters
 client_id = cfg.get_parameters()["#client_id"]
-munchkin_id = cfg.get_parameters()["#munchkin_id"]
+munchkin_id = cfg.get_parameters()["munchkin_id"]
 client_secret = cfg.get_parameters()["#client_secret"]
 dayspan_updated = cfg.get_parameters()["dayspan_updated"]
 dayspan_created = cfg.get_parameters()["dayspan_created"]
@@ -188,9 +188,11 @@ parameters_1 = {'client_id': client_id,
                 'client_secret': client_secret,
                 'grant_type': 'client_credentials'}
 
+BASE_URL = f'https://{munchkin_id}.mktorest.com'
+
 # get the token
 resp = requests.get(
-    url='https://566-GCC-428.mktorest.com/identity/oauth/token', params=parameters_1)
+    url=BASE_URL + '/identity/oauth/token', params=parameters_1)
 check_response(resp, 'Obtaining access token')
 
 access_token = resp.json()['access_token']
@@ -225,7 +227,7 @@ if endpoint == 'Activities':
         pass
 
     # Create the export
-    create_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/create.json',
+    create_export = requests.post(url=BASE_URL + '/bulk/v1/activities/export/create.json',
                                   params=parameters_2, json=body)
 
     check_response(create_export, 'Creating export')
@@ -237,14 +239,14 @@ if endpoint == 'Activities':
     export_id = create_export.json()['result'][0]['exportId']
 
     # Enqueue export
-    enqueue_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
+    enqueue_export = requests.post(url=BASE_URL + '/bulk/v1/activities/export/' +
                                    export_id + '/enqueue.json',
                                    params=parameters_2)
 
     check_response(enqueue_export, 'Enqueuing export')
 
     time.sleep(60)
-    status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
+    status_export = requests.get(url=BASE_URL + '/bulk/v1/activities/export/' +
                                  export_id + '/status.json',
                                  params=parameters_2)
 
@@ -254,7 +256,7 @@ if endpoint == 'Activities':
     while status_export.json()['result'][0]['status'] != 'Completed':
         print('Export not ready, next check in 60 seconds.')
         time.sleep(60)
-        status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/activities/export/' +
+        status_export = requests.get(url=BASE_URL + '/bulk/v1/activities/export/' +
                                      export_id + '/status.json',
                                      params=parameters_2)
         check_response(status_export, 'Getting status of the export')
@@ -263,7 +265,7 @@ if endpoint == 'Activities':
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
     # assemble the curl command and running it
-    args = "curl \"https://566-GCC-428.mktorest.com/bulk/v1/activities/export/" + export_id + \
+    args = f"curl \"{BASE_URL}/bulk/v1/activities/export/" + export_id + \
         "/file.json?access_token=" + access_token + "\"" + " > \"" + output_file + "\""
     subprocess.call(args, shell=True)
 
@@ -298,7 +300,7 @@ elif endpoint == 'Leads':
         sys.exit(1)
 
     # Create the export
-    create_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/create.json',
+    create_export = requests.post(url=BASE_URL + '/bulk/v1/leads/export/create.json',
                                   params=parameters_2, json=body)
 
     check_response(create_export, 'Creating export')
@@ -310,14 +312,14 @@ elif endpoint == 'Leads':
 
     export_id = create_export.json()['result'][0]['exportId']
 
-    enqueue_export = requests.post('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/' +
+    enqueue_export = requests.post(url=BASE_URL + '/bulk/v1/leads/export/' +
                                    export_id + '/enqueue.json',
                                    params=parameters_2)
 
     check_response(enqueue_export, 'Enqueuing export')
 
     time.sleep(60)
-    status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/' +
+    status_export = requests.get(url=BASE_URL + '/bulk/v1/leads/export/' +
                                  export_id + '/status.json',
                                  params=parameters_2)
 
@@ -327,7 +329,7 @@ elif endpoint == 'Leads':
     while status_export.json()['result'][0]['status'] != 'Completed':
         print('Export not ready, next check in 60 seconds.')
         time.sleep(60)
-        status_export = requests.get('https://566-GCC-428.mktorest.com/bulk/v1/leads/export/' +
+        status_export = requests.get(url=BASE_URL + '/bulk/v1/leads/export/' +
                                      export_id + '/status.json',
                                      params=parameters_2)
         check_response(status_export, 'Getting status of the export')
@@ -335,7 +337,7 @@ elif endpoint == 'Leads':
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
     # assemble the curl command and run it
-    args = "curl \"https://566-GCC-428.mktorest.com/bulk/v1/leads/export/" + export_id + \
+    args = f"curl \"{BASE_URL}/bulk/v1/leads/export/" + export_id + \
         "/file.json?access_token=" + access_token + "\"" + " > \"" + output_file + "\""
     subprocess.call(args, shell=True)
     file_name = endpoint + "_bulk.csv"
