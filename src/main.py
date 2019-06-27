@@ -31,7 +31,7 @@ params = cfg.get_parameters()
 
 # Read the parameters
 client_id = cfg.get_parameters()["#client_id"]
-munchkin_id = cfg.get_parameters()["munchkin_id"]
+munchkin_id = cfg.get_parameters()["munchkinid"]
 client_secret = cfg.get_parameters()["#client_secret"]
 dayspan_updated = cfg.get_parameters()["dayspan_updated"]
 dayspan_created = cfg.get_parameters()["dayspan_created"]
