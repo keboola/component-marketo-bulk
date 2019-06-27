@@ -29,7 +29,6 @@
 	  "munchkin_id": {
 		"type": "string",
 		"title": "Munchkin ID token",
-		"format": "string",
 		"description": "The first part of Identity. Can be found in Admin > Web Services menu in the REST API section",
 		"propertyOrder": 1
 	  },
