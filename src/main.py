@@ -1,7 +1,3 @@
-'''
-code is a hot fix, not a finished work
-'''
-
 import sys
 import requests
 import time
@@ -17,7 +13,7 @@ abspath = os.path.abspath(__file__)
 script_path = os.path.dirname(abspath)
 os.chdir(script_path)
 
-sys.tracebacklimit = None
+sys.tracebacklimit = 0
 
 # Logging
 logging.basicConfig(
@@ -235,6 +231,7 @@ if endpoint == 'Activities':
         logging.info('Creating export was not successfull.')
         logging.info('Errors:')
         logging.info(create_export.json()['errors'])
+        sys.exit(2)
 
     export_id = create_export.json()['result'][0]['exportId']
 
@@ -253,13 +250,23 @@ if endpoint == 'Activities':
     check_response(status_export, 'Getting status of the export')
 
     # Wait for them to prepare the export
-    while status_export.json()['result'][0]['status'] != 'Completed':
-        print('Export not ready, next check in 60 seconds.')
-        time.sleep(60)
-        status_export = requests.get(url=BASE_URL + '/bulk/v1/activities/export/' +
-                                     export_id + '/status.json',
-                                     params=parameters_2)
-        check_response(status_export, 'Getting status of the export')
+    try:
+        while status_export.json()['result'][0]['status'] != 'Completed':
+            print('Export not ready, next check in 60 seconds.')
+            time.sleep(60)
+            status_export = requests.get(url=BASE_URL + '/bulk/v1/activities/export/' +
+                                         export_id + '/status.json',
+                                         params=parameters_2)
+            check_response(status_export, 'Getting status of the export')
+    except KeyError:
+        logging.info("There was a problem when obtaining the status of the export.\
+             Please try rerunning the configuration as the API sometimes behaves unpredictably.")
+        logging.error("The response.json() is:")
+        logging.error(status_export.json())
+        sys.exit(2)
+    except Exception as e:
+        logging.error(e)
+        sys.exit(2)
 
     # set up the name of the output file
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
@@ -272,6 +279,8 @@ if endpoint == 'Activities':
     # save the appropriate manifest
     file_name = endpoint + "_bulk.csv"
     save_manifest(file_name=file_name, primary_keys=['marketoGUID'])
+    logging.info('Success!')
+    sys.exit(0)
 
 # endpoint
 elif endpoint == 'Leads':
@@ -326,13 +335,24 @@ elif endpoint == 'Leads':
     check_response(status_export, 'Getting status of the export')
 
     # Wait for them to prepare the export
-    while status_export.json()['result'][0]['status'] != 'Completed':
-        print('Export not ready, next check in 60 seconds.')
-        time.sleep(60)
-        status_export = requests.get(url=BASE_URL + '/bulk/v1/leads/export/' +
-                                     export_id + '/status.json',
-                                     params=parameters_2)
-        check_response(status_export, 'Getting status of the export')
+    try:
+        while status_export.json()['result'][0]['status'] != 'Completed':
+            print('Export not ready, next check in 60 seconds.')
+            time.sleep(60)
+            status_export = requests.get(url=BASE_URL + '/bulk/v1/leads/export/' +
+                                         export_id + '/status.json',
+                                         params=parameters_2)
+            check_response(status_export, 'Getting status of the export')
+    except KeyError:
+        logging.info("There was a problem when obtaining the status of the export.\
+             Please try rerunning the configuration as the API sometimes behaves unpredictably.")
+        logging.error("The response.json() is:")
+        logging.error(status_export.json())
+        sys.exit(2)
+    except Exception as e:
+        logging.error("Could not produce output file manifest.")
+        logging.error(e)
+        sys.exit(2)
 
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
@@ -344,5 +364,7 @@ elif endpoint == 'Leads':
 
     # save the manifest
     save_manifest(file_name=file_name, primary_keys=['id'])
+    logging.info('Success!')
+    sys.exit(0)
 else:
     logging.info('The endpoint is incorrectly specified.')
