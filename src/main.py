@@ -368,6 +368,7 @@ elif endpoint == 'Leads':
 
     if row_count == 0:
         logging.info('The export from the API reached state Completed, but no data were transferred from the API.')
+        os.remove(output_file)
         sys.exit(0)
 
     # save the manifest
