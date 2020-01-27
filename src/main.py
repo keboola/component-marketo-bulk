@@ -366,7 +366,7 @@ elif endpoint == 'Leads':
     rows = list(csv.reader(open(output_file)))
     row_count = len(rows)
 
-    if row_count == 0 or row_count == 1:
+    if row_count == 0:
         logging.info('The export from the API reached state Completed, but no data were transferred from the API.')
         sys.exit(0)
 
