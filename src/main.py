@@ -7,6 +7,7 @@ from keboola import docker
 from datetime import datetime, timedelta
 import subprocess
 import json
+import csv
 
 # Environment setup
 abspath = os.path.abspath(__file__)
@@ -361,6 +362,13 @@ elif endpoint == 'Leads':
         "/file.json?access_token=" + access_token + "\"" + " > \"" + output_file + "\""
     subprocess.call(args, shell=True)
     file_name = endpoint + "_bulk.csv"
+
+    rows = list(csv.reader(open(output_file)))
+    row_count = len(rows)
+
+    if row_count == 0 or row_count == 1:
+        logging.info('The export from the API reached state Completed, but no data were transferred from the API.')
+        sys.exit(0)
 
     # save the manifest
     save_manifest(file_name=file_name, primary_keys=['id'])
