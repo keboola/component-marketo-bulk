@@ -235,6 +235,7 @@ if endpoint == 'Activities':
         sys.exit(2)
 
     export_id = create_export.json()['result'][0]['exportId']
+    print(f"The export id is {export_id}.")
 
     # Enqueue export
     enqueue_export = requests.post(url=BASE_URL + '/bulk/v1/activities/export/' +
@@ -321,6 +322,7 @@ elif endpoint == 'Leads':
         logging.info(create_export.json()['errors'])
 
     export_id = create_export.json()['result'][0]['exportId']
+    print(f"The export id is {export_id}.")
 
     enqueue_export = requests.post(url=BASE_URL + '/bulk/v1/leads/export/' +
                                    export_id + '/enqueue.json',
