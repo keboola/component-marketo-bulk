@@ -232,7 +232,7 @@ if endpoint == 'Activities':
         logging.info('Creating export was not successfull.')
         logging.info('Errors:')
         logging.info(create_export.json()['errors'])
-        sys.exit(2)
+        sys.exit(1)
 
     export_id = create_export.json()['result'][0]['exportId']
     print(f"The export id is {export_id}.")
@@ -265,10 +265,10 @@ if endpoint == 'Activities':
              Please try rerunning the configuration as the API sometimes behaves unpredictably.")
         logging.error("The response.json() is:")
         logging.error(status_export.json())
-        sys.exit(2)
+        sys.exit(1)
     except Exception as e:
         logging.error(e)
-        sys.exit(2)
+        sys.exit(1)
 
     # set up the name of the output file
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
@@ -351,11 +351,11 @@ elif endpoint == 'Leads':
              Please try rerunning the configuration as the API sometimes behaves unpredictably.")
         logging.error("The response.json() is:")
         logging.error(status_export.json())
-        sys.exit(2)
+        sys.exit(1)
     except Exception as e:
         logging.error("Could not produce output file manifest.")
         logging.error(e)
-        sys.exit(2)
+        sys.exit(1)
 
     output_file = DEFAULT_TABLE_DESTINATION + endpoint + "_bulk.csv"
 
