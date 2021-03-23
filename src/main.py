@@ -301,6 +301,7 @@ if endpoint == 'Activities':
     # assemble the curl command and running it
     args = f"curl \"{BASE_URL}/bulk/v1/activities/export/" + export_id + \
         "/file.json?access_token=" + access_token + "\"" + " > \"" + output_file + "\""
+    print(args)
     subprocess.call(args, shell=True)
 
     # save the appropriate manifest

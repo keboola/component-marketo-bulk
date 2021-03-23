@@ -100,9 +100,9 @@ class Component():
 
         # Request parameters based on user inputs
         CREATED_DATE, start_created, end_created = self.create_date_ranges(
-            dayspan_created, month_year_created)
+            dayspan_created, month_year_created, 'Created')
         UPDATED_DATE, start_updated, end_updated = self.create_date_ranges(
-            dayspan_updated, month_year_updated)
+            dayspan_updated, month_year_updated, 'Updated')
 
         date_obj = {
             'created_date_bool': CREATED_DATE,
@@ -139,14 +139,15 @@ class Component():
             logging.error('The response code is: ' + str(response.status_code))
             sys.exit(1)
         else:
-            logging.info(stage + ' passed.')
+            logging.info(stage)
 
     def authenticate(self, client_id, client_secret):
 
         auth_url = f'{self.BASE_URL}/identity/oauth/token'
         params = {
             'client_id': client_id,
-            'client_secret': client_secret
+            'client_secret': client_secret,
+            'grant_type': 'client_credentials'
         }
 
         response = requests.get(url=auth_url, params=params)
@@ -256,7 +257,7 @@ class Component():
             request_body['fields'] = self.fields_str
 
             # Filter parameters
-            if not date_obj['updated_date_bool'] or not date_obj['created_date_bool']:
+            if not date_obj['updated_date_bool'] and not date_obj['created_date_bool']:
                 logging.error(
                     'The Leads endpoint requries either Created or Updated parameter.')
                 sys.exit(1)
@@ -268,91 +269,32 @@ class Component():
             if date_obj['updated_date_bool']:
                 updated_at = {
                     'startAt': date_obj['start_updated_date'],
-                    'endaAt': date_obj['end_updated_date']
+                    'endAt': date_obj['end_updated_date']
                 }
                 request_body['filter']['updatedAt'] = updated_at
 
             # Create parameters
-            if date_obj['createded_date_bool']:
+            if date_obj['created_date_bool']:
                 created_at = {
                     'startAt': date_obj['start_created_date'],
-                    'endaAt': date_obj['end_created_date']
+                    'endAt': date_obj['end_created_date']
                 }
                 request_body['filter']['createdAt'] = created_at
 
         # 1 - Create exports
-        '''
-        export_url = f'{request_url}/create.json'
-        create_export = requests.post(
-            url=export_url, params=request_param, json=request_body)
-        self.check_response(create_export, 'Creating export')
-
-        if not create_export.json()['success']:
-            logging.error(
-                f'Creating export was not successful; Errors: {create_export.json()["errors"]}')
-            sys.exit(1)
-
-        export_id = create_export.json()['result'][0]['exportId']
-        logging.info(f'Export ID: [{export_id}]')
-        '''
         export_id = self.create_mkto_export(
             request_url, request_param, request_body)
 
         # 2 - Enqueue export
-        '''
-        enqueue_url = f'{request_url}/{export_id}/enqueue.json'
-        enqueue_export = requests.post(url=enqueue_url, params=request_param)
-        self.check_response(enqueue_export, 'Enqueuing export')
-        '''
         self.enqueue_mkto_export(request_url, request_param, export_id)
 
         # 3 - loop while waiting for the report to be ready
         ready_bool = False
-        '''
-        status_url = f'{request_url}/{export_id}/status.json'
-        while ready_bool:
-            time.sleep(60)
-            status_export = requests.get(url=status_url, params=request_param)
-            self.check_response(status_export, 'Getting status of the export')
-
-            try:
-                if status_export.json()['result'][0]['status'] == 'Completed':
-                    ready_bool = True
-            except KeyError:
-                logging.error("There was a problem when obtaining the status of the export.\
-                Please try rerunning the configuration as the API sometimes behaves unpredictably.")
-                logging.error(f'Response: {status_export.json()}')
-                sys.exit(1)
-            except Exception as e:
-                logging.error(e)
-                sys.exit(1)
-        '''
-        while ready_bool:
+        while not ready_bool:
             ready_bool = self.check_mkto_export_status(
                 request_url, request_param, export_id)
 
         # 4 - Outputing the file
-        '''
-        output_file = DEFAULT_TABLE_DESTINATION + endpoint + '_bulk.csv'
-        output_curl = f'curl "{request_url}/{export_id}/file.json?access_token={self.access_token}" > "{output_file}"'
-
-        subprocess.call(output_curl, shell=True)
-
-        # 5 - Outputting manifest if there is data
-        rows = list(csv.reader(open(output_file)))
-        row_count = len(rows)
-
-        if row_count == 0:
-            logging.info(
-                'The export from the API reached state Completed, but no data were transferred from the API.')
-            os.remove(output_file)
-
-        else:
-            self.save_manifest(
-                file_name=f'{endpoint}_bulk.csv', primary_keys=['marketoGUID'])
-
-            logging.info(f'{endpoint} exported.')
-        '''
         self.output_mkt_export(request_url, request_param, export_id, endpoint)
 
     def create_mkto_export(self, request_url, request_param, request_body):
@@ -385,7 +327,7 @@ class Component():
         ready_bool = False
         status_url = f'{request_url}/{export_id}/status.json'
         status_export = requests.get(url=status_url, params=request_param)
-        self.check_response(status_export, 'Getting status of the export')
+        self.check_response(status_export, 'Standing by for export status')
 
         try:
             if status_export.json()['result'][0]['status'] == 'Completed':
