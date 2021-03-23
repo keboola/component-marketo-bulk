@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 import subprocess
 import json
 import csv
+import logging_gelf.handlers
+import logging_gelf.formatters  # noqa
 
 # Environment setup
 abspath = os.path.abspath(__file__)
@@ -21,6 +23,28 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt="%Y-%m-%d %H:%M:%S")
+'''
+logger = logging.getLogger()
+logging_gelf_handler = logging_gelf.handlers.GELFTCPSocketHandler(
+    host=os.getenv('KBC_LOGGER_ADDR'),
+    port=int(os.getenv('KBC_LOGGER_PORT'))
+)
+logging_gelf_handler.setFormatter(
+    logging_gelf.formatters.GELFFormatter(null_character=True))
+logger.addHandler(logging_gelf_handler)
+
+# removes the initial stdout logging
+logger.removeHandler(logger.handlers[0])
+'''
+
+# Destination to fetch and output files and tables
+DEFAULT_TABLE_INPUT = "/data/in/tables/"
+DEFAULT_FILE_INPUT = "/data/in/files/"
+
+DEFAULT_FILE_DESTINATION = "/data/out/files/"
+DEFAULT_TABLE_DESTINATION = "/data/out/tables/"
+
+COMPONENT_VERSION = '1.3.5'
 
 # Access the supplied rules
 cfg = docker.Config('/data/')
@@ -40,13 +64,14 @@ month_year_updated = cfg.get_parameters()["month/year_updated"]
 fields_str_tmp = cfg.get_parameters()["desired_fields"]
 fields_str = [i.strip() for i in fields_str_tmp.split(",")]
 
-logging.info("Dayspan updated: %s" % dayspan_updated)
-logging.info("Dayspan created: %s" % dayspan_created)
+# Outputing log if parameters are configured
 logging.info("Endpoint: %s" % endpoint)
-logging.info("Desired activities: %s" % str(desired_activities))
-logging.info("Month/Year updated: %s" % month_year_updated)
-logging.info("Month/Year created: %s" % month_year_created)
-logging.info("Desired fields: %s" % str(fields_str))
+logging.info("Dayspan updated: %s" % dayspan_updated) if dayspan_updated else ''
+logging.info("Dayspan created: %s" % dayspan_created) if dayspan_created else ''
+logging.info("Desired activities: %s" % str(desired_activities)) if desired_activities_tmp else ''
+logging.info("Month/Year updated: %s" % month_year_updated) if month_year_updated else ''
+logging.info("Month/Year created: %s" % month_year_created) if month_year_created else ''
+logging.info("Desired fields: %s" % str(fields_str)) if fields_str_tmp else ''
 
 # Created filter
 # Determine whether we want to get data from past X days or from a specific month/year.
@@ -78,7 +103,7 @@ if dayspan_created == '' and month_year_created != '':
 elif dayspan_created != '' and month_year_created != '':
     CREATED_DATE = True
     logging.info('Disregarding the <Month/Year for \'Created\'> parameter, taking into consideration only the \
-<How many days back you want to go with \'Created\'?> parameter')
+    <How many days back you want to go with \'Created\'?> parameter')
     start_created = str((datetime.utcnow() - timedelta(days=int(dayspan_created)))
                         .date())
     end_created = str(datetime.utcnow().date())
@@ -322,7 +347,7 @@ elif endpoint == 'Leads':
         logging.info(create_export.json()['errors'])
 
     export_id = create_export.json()['result'][0]['exportId']
-    print(f"The export id is {export_id}.")
+    logging.info(f"The export id is {export_id}.")
 
     enqueue_export = requests.post(url=BASE_URL + '/bulk/v1/leads/export/' +
                                    export_id + '/enqueue.json',
@@ -369,7 +394,8 @@ elif endpoint == 'Leads':
     row_count = len(rows)
 
     if row_count == 0:
-        logging.info('The export from the API reached state Completed, but no data were transferred from the API.')
+        logging.info(
+            'The export from the API reached state Completed, but no data were transferred from the API.')
         os.remove(output_file)
         sys.exit(0)
 

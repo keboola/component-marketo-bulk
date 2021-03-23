@@ -2,76 +2,79 @@
 	"type": "object",
 	"title": "Marketo Database",
 	"required": [
-	  "munchkinid",
-	  "#client_id",
-	  "#client_secret",
-	  "desired_activities",
-	  "dayspan_created",
-	  "dayspan_updated",
-	  "endpoint",
-	  "month/year_created",
-	  "month/year_updated",
-	  "desired_fields"
+		"munchkinid",
+		"#client_id",
+		"#client_secret",
+		"desired_activities",
+		"dayspan_created",
+		"dayspan_updated",
+		"endpoint",
+		"month/year_created",
+		"month/year_updated",
+		"desired_fields"
 	],
 	"properties": {
-	  "endpoint": {
-		"type": "string",
-		"title": "Endpoint",
-		"description": "use either `Leads` or `Activities`",
-		"propertyOrder": 4
-	  },
-	  "#client_id": {
-		"type": "string",
-		"title": "Client ID token",
-		"format": "password",
-		"propertyOrder": 2
-	  },
-	  "munchkinid": {
-		"type": "string",
-		"title": "Munchkin ID token",
-		"description": "The first part of Identity. Can be found in Admin > Web Services menu in the REST API section",
-		"propertyOrder": 1
-	  },
-	  "#client_secret": {
-		"type": "string",
-		"title": "Client Secret token",
-		"format": "password",
-		"propertyOrder": 3
-	  },
-	  "desired_fields": {
-		"type": "string",
-		"title": "Desired Fields",
-		"description": "Write down the column names you want to extract and separate them by comma. Relevant only to Leads endpoint. Must contain id column as it is the primary key.",
-		"propertyOrder": 10
-	  },
-	  "dayspan_created": {
-		"type": "string",
-		"title": "How many days back you want to go with 'Created'?",
-		"propertyOrder": 7
-	  },
-	  "dayspan_updated": {
-		"type": "string",
-		"title": "How many days back you want to go with 'Updated'?",
-		"description": "Valid only for leads endpoint.",
-		"propertyOrder": 9
-	  },
-	  "desired_activities": {
-		"type": "string",
-		"title": "Desired Activities",
-		"description": "Use only for Activities endpoint. Write down the IDs of activities you want to extract and separate them by comma. Note: The “Delete Lead” activity is not supported.",
-		"propertyOrder": 5
-	  },
-	  "month/year_created": {
-		"type": "string",
-		"title": "Month/Year for 'Created'",
-		"description": "Alternative to the following field (if both are filled, the following field is used). You can specify a month/year in format MMM YYYY, e.g. Oct 2018.",
-		"propertyOrder": 6
-	  },
-	  "month/year_updated": {
-		"type": "string",
-		"title": "Month/Year for 'Updated'",
-		"description": "Alternative to the following field (if both are filled, the following field is used). You can specify a month/year in format MMM YYYY, e.g. Oct 2018.  Valid only for leads endpoint.",
-		"propertyOrder": 8
-	  }
+		"munchkinid": {
+			"type": "string",
+			"title": "Munchkin ID token",
+			"description": "The first part of Identity. Can be found in Admin > Web Services menu in the REST API section",
+			"propertyOrder": 1
+		},
+		"#client_id": {
+			"type": "string",
+			"title": "Client ID token",
+			"format": "password",
+			"propertyOrder": 2
+		},
+		"#client_secret": {
+			"type": "string",
+			"title": "Client Secret token",
+			"format": "password",
+			"propertyOrder": 3
+		},
+		"endpoint": {
+			"type": "string",
+			"title": "Endpoint",
+			"enum": [
+				"Leads",
+				"Activities"
+			],
+			"propertyOrder": 4
+		},
+		"desired_activities": {
+			"type": "string",
+			"title": "Desired Activities",
+			"description": "Use only for Activities endpoint. Write down the IDs of activities you want to extract and separate them by comma. Note: The “Delete Lead” activity is not supported.",
+			"propertyOrder": 5
+		},
+		"month/year_created": {
+			"type": "string",
+			"title": "Month/Year for 'Created'",
+			"description": "Alternative to the following field (if both are filled, the following field is used). You can specify a month/year in format MMM YYYY, e.g. Oct 2018.",
+			"propertyOrder": 6
+		},
+		"dayspan_created": {
+			"type": "string",
+			"title": "How many days back you want to go with 'Created'?",
+			"propertyOrder": 7
+		},
+		"month/year_updated": {
+			"type": "string",
+			"title": "Month/Year for 'Updated'",
+			"description": "Alternative to the following field (if both are filled, the following field is used). You can specify a month/year in format MMM YYYY, e.g. Oct 2018.  Valid only for leads endpoint.",
+			"propertyOrder": 8
+		},
+		"dayspan_updated": {
+			"type": "string",
+			"title": "How many days back you want to go with 'Updated'?",
+			"description": "Valid only for leads endpoint.",
+			"propertyOrder": 9
+		},
+		"desired_fields": {
+			"type": "string",
+			"title": "Desired Fields",
+			"description": "Write down the column names you want to extract and separate them by comma. Relevant only to Leads endpoint. Must contain id column as it is the primary key.",
+			"propertyOrder": 10
+		}
 	}
-  }
+}
