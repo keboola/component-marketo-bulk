@@ -5,9 +5,7 @@ import logging
 import os
 from keboola import docker
 from datetime import datetime, timedelta
-import subprocess
 import json
-import csv
 import logging_gelf.handlers
 import logging_gelf.formatters  # noqa
 
@@ -32,6 +30,15 @@ logger.addHandler(logging_gelf_handler)
 # removes the initial stdout logging
 logger.removeHandler(logger.handlers[0])
 
+
+# Disabling list of libraries you want to output in the logger
+disable_libraries = [
+    'urllib3',
+    'requests'
+]
+for library in disable_libraries:
+    logging.getLogger(library).disabled = True
+
 # Destination to fetch and output files and tables
 DEFAULT_TABLE_INPUT = "/data/in/tables/"
 DEFAULT_FILE_INPUT = "/data/in/files/"
@@ -41,6 +48,7 @@ DEFAULT_TABLE_DESTINATION = "/data/out/tables/"
 
 APP_VERSION = '1.3.6'
 KEY_DEBUG = 'debug'
+
 
 
 class Component():
@@ -154,6 +162,26 @@ class Component():
         self.check_response(response, 'Fetching access token')
 
         return response.json()['access_token']
+
+    def get_request(self, url, params=None):
+
+        try:
+            response = requests.get(url, params=params)
+        except Exception as err:
+            logging.error(f'Error occured: {err}')
+            sys.exit(1)
+
+        return response
+
+    def post_request(self, url, params=None, body=None):
+
+        try:
+            response = requests.post(url, params=params, json=body)
+        except Exception as err:
+            logging.error(f'Error occured: {err}')
+            sys.exit(1)
+
+        return response
 
     def create_date_ranges(self, dayspan, month_year, date_type):
         '''
@@ -300,8 +328,10 @@ class Component():
     def create_mkto_export(self, request_url, request_param, request_body):
 
         export_url = f'{request_url}/create.json'
-        create_export = requests.post(
-            url=export_url, params=request_param, json=request_body)
+        '''create_export = requests.post(
+            url=export_url, params=request_param, json=request_body)'''
+        create_export = self.post_request(
+            export_url, request_param, request_body)
         self.check_response(create_export, 'Creating export')
 
         if not create_export.json()['success']:
@@ -317,7 +347,9 @@ class Component():
     def enqueue_mkto_export(self, request_url, request_param, export_id):
 
         enqueue_url = f'{request_url}/{export_id}/enqueue.json'
-        enqueue_export = requests.post(url=enqueue_url, params=request_param)
+        '''enqueue_export = requests.post(url=enqueue_url, params=request_param)'''
+        enqueue_export = self.post_request(
+            enqueue_url, request_param, body=None)
         self.check_response(enqueue_export, 'Enqueuing export')
 
     def check_mkto_export_status(self, request_url, request_param, export_id):
@@ -326,7 +358,8 @@ class Component():
 
         ready_bool = False
         status_url = f'{request_url}/{export_id}/status.json'
-        status_export = requests.get(url=status_url, params=request_param)
+        '''status_export = requests.get(url=status_url, params=request_param)'''
+        status_export = self.get_request(status_url, params=request_param)
         self.check_response(status_export, 'Standing by for export status')
 
         try:
@@ -345,23 +378,30 @@ class Component():
 
     def output_mkt_export(self, request_url, request_param, export_id, endpoint):
 
-        output_file = DEFAULT_TABLE_DESTINATION + endpoint + '_bulk.csv'
-        output_curl = f'curl "{request_url}/{export_id}/file.json?access_token={self.access_token}" > "{output_file}"'
+        # Output file destination
+        output_file_name = endpoint.capitalize() + '_bulk.csv'
+        output_file_destination = DEFAULT_TABLE_DESTINATION + output_file_name
 
-        subprocess.call(output_curl, shell=True)
+        # Output file request parameter
+        output_url = f'{request_url}/{export_id}/file.json'
 
-        # 5 - Outputting manifest if there is data
-        rows = list(csv.reader(open(output_file)))
-        row_count = len(rows)
+        '''response = requests.get(request_url, params=request_param)'''
+        response = self.get_request(output_url, request_param)
 
-        if row_count == 0:
+        # Output file
+        csv_file = open(output_file_destination, 'wb')
+        csv_file.write(response.content)
+        csv_file.close()
+
+        # Outputting manifest if there is data
+        if len(list(response.content)) == 0:
             logging.info(
                 'The export from the API reached state Completed, but no data were transferred from the API.')
-            os.remove(output_file)
+            os.remove(output_file_destination)
 
         else:
             self.save_manifest(
-                file_name=f'{endpoint}_bulk.csv', primary_keys=['marketoGUID'])
+                file_name=output_file_name, primary_keys=['marketoGUID'])
 
             logging.info(f'{endpoint} exported.')
 
