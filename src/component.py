@@ -50,7 +50,6 @@ APP_VERSION = '1.3.6'
 KEY_DEBUG = 'debug'
 
 
-
 class Component():
     def __init__(self, debug=False):
 
