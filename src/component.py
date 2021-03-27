@@ -68,6 +68,9 @@ class Component():
         cfg = docker.Config('/data/')
         params = cfg.get_parameters()
 
+        # Validating user inputs
+        self.validate_user_parameters(params)
+
         # Read the parameters
         # Credentials parameters
         client_id = params.get("#client_id")
@@ -130,7 +133,7 @@ class Component():
             sys.exit(1)
 
         # 2 - Check if all the credentials are entered
-        if not self.client_id or not self.munchkin_id or not self.client_secret:
+        if not params.get('#client_id') or not params.get('munchkinid') or not params.get('#client_secret'):
             logging.error(
                 "Credentials are missing: [Client ID], [Munchkin ID], [Client Secret]")
             sys.exit(1)
@@ -140,10 +143,18 @@ class Component():
             logging.error('Specified endpoint is not supported.')
             sys.exit(1)
 
+        # 4 - when endpoint leads is selected, desired fields cannot be empty
+        fields_str_tmp = params.get('desired_fields')
+        fields_str = [i.strip() for i in fields_str_tmp.split(",")
+                      ] if fields_str_tmp else ''
+        if params.get('endpoint') == 'Leads' and len(fields_str) == 0:
+            logging.error(
+                "Please specify [Desired Fields] when endpoint [Leads] is selected.")
+            sys.exit(1)
+
     def check_response(self, response, stage):
         if response.status_code != 200:
-            logging.error(stage + ' failed.')
-            logging.error('The response code is: ' + str(response.status_code))
+            logging.error(f'[{response.status_code}] - {stage} failed.')
             sys.exit(1)
         else:
             logging.info(stage)
@@ -399,8 +410,9 @@ class Component():
             os.remove(output_file_destination)
 
         else:
+            pk = ['marketoGUID'] if endpoint == 'activities' else ['id']
             self.save_manifest(
-                file_name=output_file_name, primary_keys=['marketoGUID'])
+                file_name=output_file_name, primary_keys=pk)
 
             logging.info(f'{endpoint} exported.')
 

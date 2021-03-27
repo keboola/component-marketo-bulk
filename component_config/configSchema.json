@@ -17,7 +17,7 @@
 		"munchkinid": {
 			"type": "string",
 			"title": "Munchkin ID token",
-			"description": "The first part of Identity. Can be found in Admin > Web Services menu in the REST API section",
+			"description": "Can be found in [Admin] > [Web Services] menu in the REST API section",
 			"propertyOrder": 1
 		},
 		"#client_id": {
@@ -41,39 +41,39 @@
 			],
 			"propertyOrder": 4
 		},
-		"desired_activities": {
-			"type": "string",
-			"title": "Desired Activities",
-			"description": "Use only for Activities endpoint. Write down the IDs of activities you want to extract and separate them by comma. Note: The “Delete Lead” activity is not supported.",
-			"propertyOrder": 5
-		},
 		"month/year_created": {
 			"type": "string",
 			"title": "Month/Year for 'Created'",
 			"description": "Alternative to the following field (if both are filled, the following field is used). You can specify a month/year in format MMM YYYY, e.g. Oct 2018.",
-			"propertyOrder": 6
+			"propertyOrder": 5
 		},
 		"dayspan_created": {
 			"type": "string",
 			"title": "How many days back you want to go with 'Created'?",
-			"propertyOrder": 7
+			"propertyOrder": 6
 		},
 		"month/year_updated": {
 			"type": "string",
 			"title": "Month/Year for 'Updated'",
-			"description": "Alternative to the following field (if both are filled, the following field is used). You can specify a month/year in format MMM YYYY, e.g. Oct 2018.  Valid only for leads endpoint.",
-			"propertyOrder": 8
+			"description": "Relevant to [Leads] endpoint only. Alternative to the following field (if both are filled, the following field is used). You can specify a month/year in format MMM YYYY, e.g. Oct 2018.",
+			"propertyOrder": 7
 		},
 		"dayspan_updated": {
 			"type": "string",
 			"title": "How many days back you want to go with 'Updated'?",
-			"description": "Valid only for leads endpoint.",
+			"description": "Relevant to [Leads] endpoint only.",
+			"propertyOrder": 8
+		},
+		"desired_activities": {
+			"type": "string",
+			"title": "Desired Activities",
+			"description": "Relevant to [Activities] endpoint only. Write down the IDs of activities you want to extract and separate them by comma. Note: The “Delete Lead” activity is not supported.",
 			"propertyOrder": 9
 		},
 		"desired_fields": {
 			"type": "string",
 			"title": "Desired Fields",
-			"description": "Write down the column names you want to extract and separate them by comma. Relevant only to Leads endpoint. Must contain id column as it is the primary key.",
+			"description": "Relevant to [Leads] endpoint only. Specifying the columns you want to extractor and id column needs to be include as it is the primary key. Comma separated.",
 			"propertyOrder": 10
 		}
 	}
