@@ -215,9 +215,8 @@ class Component():
 
             # Disregarding Created value is not empty
             if month_year != '':
-                logging.info(f'Disregarding the <Month/Year for      \'{date_type}\'> parameter, taking into consideration only \
-                     the <How many days back you want to go with \'{date_type}\'?> parameter''Disregrading the <Month/\
-                    Year ')
+                logging.info(f'Disregarding the <Month/Year for \'{date_type}\'> parameter, taking into consideration '
+                             f'only the <How many days back you want to go with \'{date_type}\'?> parameter')
 
         # when dayspan variable is not specified
         else:
