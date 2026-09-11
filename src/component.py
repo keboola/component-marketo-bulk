@@ -173,10 +173,13 @@ class Component():
 
         return response.json()['access_token']
 
+    def auth_headers(self):
+        return {'Authorization': f'Bearer {self.access_token}'}
+
     def get_request(self, url, params=None):
 
         try:
-            response = requests.get(url, params=params)
+            response = requests.get(url, params=params, headers=self.auth_headers())
         except Exception as err:
             logging.error(f'Error occured: {err}')
             sys.exit(1)
@@ -186,7 +189,7 @@ class Component():
     def post_request(self, url, params=None, body=None):
 
         try:
-            response = requests.post(url, params=params, json=body)
+            response = requests.post(url, params=params, json=body, headers=self.auth_headers())
         except Exception as err:
             logging.error(f'Error occured: {err}')
             sys.exit(1)
@@ -257,9 +260,7 @@ class Component():
 
         # Request parameters
         request_url = f'{self.BASE_URL}/bulk/v1/{endpoint}/export'
-        request_param = {
-            'access_token': self.access_token
-        }
+        request_param = {}
         request_body = {
             'format': 'CSV'
         }
